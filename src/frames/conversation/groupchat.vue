@@ -9,20 +9,19 @@
 				</router-link>
 			</section>
 		</head-top>
-		<section class="coversation" ref="groupHeight" @touchmove='loadMore'>
-			<section class="coversationlist">
+		<section class="coversation"  @touchmove='loadMore'>
+			<section class="coversationlist" ref="chat">
 				<div class="underscore" v-if="underscore">————&nbsp;我是有底线的&nbsp;————</div>
-				<ul>
+				<ul id="chat-content">
 					<!--  群聊-->
-					<li v-for="item in groupconversine" >
-						<div class="other" :class="{mysay : item.user_id == userInfo.id }">
+					<li v-for="item in groupconversine">
+						<div class="other" :class="{mysay : userInfo.wxid == item.fromUserId}">
 							<div class="say-time">{{item.time}}</div>
-							<img :src="imgurl + item.avatar" alt="" @click="enlargeImg(item.avatar)">
+							<img :src="item.avatar" alt="" @click="enlargeImg(item.avatar)">
 							<div class="whatsay">
-								
 								<div class="whatsay_svg">
 									<svg>
-										<use xmlns:xlink="http://www.w3.org/1999/xlink" :xlink:href="item.user_id == userInfo.id ? '#trigon-right' : '#trigon-left'"></use>
+										<use xmlns:xlink="http://www.w3.org/1999/xlink" :xlink:href=" userInfo.wxid == item.fromUserId ? '#trigon-right' : '#trigon-left'"></use>
 									</svg>
 								</div>
 								<div class="whatsay_text">
@@ -124,7 +123,9 @@
 	import 'src/config/swiper.min.js' 
 	import 'src/style/swiper.min.css'
 	import fetch from 'src/config/fetch'
-	const socket = io('http://cangdu.org:8003');
+	import $ from 'jquery'
+	import { requireImgUrl } from 'src/utils/requireImgUrl'
+
 	export default{ 
 		data(){
 			return{
@@ -148,29 +149,34 @@
 				imgurl,
 				userId:'',
 				allgroups:[],	//所有群聊信息
-
 			}
 		},
 		created(){
-			
+			this.getGroupTalkData()
 		},
 		mounted(){
 
-			this.getUserInfo();
-			this.groupList(this.offset);
-			this.loadStatus=true;
+			// this.getUserInfo();
+			this.userInfo = {
+				avatar: localStorage.getItem('avatar'),
+				id: localStorage.getItem('id'),
+				name: localStorage.getItem('name'),
+				wxid: localStorage.getItem('wxid')
+			}
+			// this.groupList(this.offset);
+			this.loadStatus=false;
 			groupChat().then((res) => {
-				this.gropname=res.petname;
+				console.log('张信哲groupChat:', res)
+				this.gropname = res.petname;
+				this.grouphead = res.grouphead
+				for(var i = 0 ;i< this.grouphead.length;i ++){
+					if(this.grouphead[i].username == localStorage.getItem('wxid')){
+						var index = this.grouphead.indexOf(this.grouphead[i])
+						this.grouphead.splice(index, 1)
+					}
+				}
+				console.log(this.grouphead)
 			});	
-			socket.on('chat', (data) => {
-				if (!data) {
-					return
-				};
-				this.groupconversine.push(data);
-				this.$nextTick(()=>{
-					window.scrollTo(0,this.$refs.groupHeight.offsetHeight-window.innerHeight)
-				})
-			});
 			chatData().then((res) => {
 				this.chatData=res;
 			}).then(()=>{
@@ -186,13 +192,21 @@
 		},
 		computed:{
 			...mapState([
-			    "infor", "userInfo","allgroup"
+			    // "infor", "userInfo", "allgroup"
+				'infor', 'allgroup'
 			]),
 		},
 		beforeDestroy(){
             clearTimeout(this.timer);
-            socket.removeAllListeners();
+            // socket.removeAllListeners();
         },
+		updated: function(){
+			this.$nextTick(()=>{
+				if(this.$refs.chat){
+					$(this.$refs.chat).scrollTop($('#chat-content').height())
+				}
+			})
+		},
 		methods:{
 			...mapActions([
                 'getUserInfo',
@@ -200,7 +214,6 @@
             ...mapMutations([
                 'GET_ALLGROUP',
             ]),
-
             async groupList(offset){
             	const groupData = await getHistory({"offset":this.offset, "limit":20} )
             	if(groupData.history.length < 20){
@@ -235,21 +248,8 @@
 						return res;
 					}
 					var arr = this.allgroups;
-					this.GET_ALLGROUP(arr.unique())//保存所有人数据信息
-					
+					this.GET_ALLGROUP(arr.unique())//保存所有人数据信息					
             	}
-        		this.$nextTick(() => {
-            		this.loadStatus=false;
-        			if (offset == 0) {
-        				this.underscore=false;
-            			window.scrollTo(0, this.$refs.groupHeight.offsetHeight - window.innerHeight)
-        			}else{
-
-        				const scrollPosition = this.$refs.groupHeight.offsetHeight - this.lastPageHeight;
-        				window.scrollTo(0,scrollPosition)
-        			}
-        			this.lastPageHeight = this.$refs.groupHeight.offsetHeight;
-        		})
             },
             loadMore(){
             	if (this.loadStatus || this.underscore) {
@@ -286,14 +286,37 @@
 			inputBottomHide(){
 				this.clickmore=false;
 			},
-			async clickSend(){
-				socket.emit('chat', {user_id: this.userInfo.id, content: this.inputmessage});
+			getGroupTalkData(){	
+				var ws = new WebSocket('ws://10.20.88.76:8204/multisub-split/456')
+				ws.onmessage = env => {
+					var obj = JSON.parse(decodeURIComponent(env.data).split('=')[1])			
+					console.log(obj)
+					var time = new Date().toLocaleString()
+					this.groupconversine.push({
+						avatar: requireImgUrl(obj.fromUserId),
+						content: obj.message,
+						id: this.infor.id,
+						time: time,
+						user_id: this.userInfo.id,
+						username: this.userInfo.name,
+						fromUserId: obj.fromUserId
+					});
+				}
+			},
+			async clickSend(){				
+				const inputmessage = this.inputmessage;
 				this.inputmessage='';
-				this.light=false;
-				this.$nextTick(()=>{
-					window.scrollTo(0,this.$refs.groupHeight.offsetHeight-window.innerHeight)
+				$.ajax({
+					url:'http://10.20.88.76:8204/pub1/456',
+					method:'post',
+					dataType:'json',
+					data:{
+						data:JSON.stringify({
+						'fromUserId': this.userInfo.wxid,
+						'message': inputmessage
+						})
+					},
 				})
-				
 			},
 			enlargeImg(enlargeImg){
 				this.enlargeurl=enlargeImg;
@@ -466,41 +489,42 @@
 		background-color: #ebebeb;
 		overflow-scrolling: touch; 
 		-webkit-overflow-scrolling: touch; 
-		padding-top: 2.06933rem;
+		padding-top: 3.06933rem;
 		.coversationlist{
 			position: relative;
-			padding:0 .32rem;
-			padding-bottom:2.6rem;
+			right: -20px;
+			padding-right: 20px;
 			overflow:auto;
-			margin:0 auto;
+			overflow-x: hidden;
+			margin-left: -10px;
+			height: 600px;
 			ul{
-				padding-top:.4rem;
-				width:15.4rem;
-        overflow-x: hidden;
+				overflow: auto;
+				overflow-x: hidden;
 				overflow-scrolling: touch; 
-				-webkit-overflow-scrolling: touch; 
-				top:0;
+				-webkit-overflow-scrolling: touch;
 				li{
 					.other{
-						width:100%;
+						width:380px;
 						@include justify(flex-start);
-						margin-bottom:1.3rem;
+						margin-bottom:.8rem;
+						padding-right: 20px;
 						align-items:top;
 						position: relative;
 						.say-time{
 							@include sizeColor(.48rem,#999);
-							width:8rem;
+							width:11rem;
 							position: absolute;
-							top:-.4rem;
-							left:2.5rem;
+							// left:2.5rem;
 						}
 						img{
 							display:block;
+							margin-top: 15px;
 							@include widthHeight(1.7493333333rem,1.7493333333rem);
 						}
 						.whatsay{
 							position: relative;
-							margin-top: .4rem;
+							margin-top: 15px;
 							
 							.whatsay_svg{
 								@include widthHeight(0.4266666667rem,0.64rem);
@@ -516,7 +540,7 @@
 							.whatsay_text{
 								margin-left:0.6399997rem;
 								max-width:10.3253333333rem;
-								background:#fff;
+								background:#9fe658;
 								padding:0.42rem 0.384rem;
 								border:1px solid #d9d9d9;
 								border-radius:8px;
@@ -531,7 +555,12 @@
 						display:flex;
 						flex-direction:row-reverse;
 						.say-time{
-							left:8.8rem;
+							position: absolute;
+							right:-2.8rem;
+							width: 11rem;
+						}
+						img{
+							margin-right: 10px;
 						}
 						.whatsay{
 							
@@ -556,11 +585,11 @@
 		}
 	}
 	footer{
-		position: fixed;
+		position: absolute;
 		z-index:10;
 		border-top:1px solid #e0e0e0;
 		background:#f5f5f5;
-		bottom:-11.712rem;
+		bottom:-190px;
 		width:100%;
 		.foot_top{
 			padding:0 0.512rem;
@@ -569,20 +598,20 @@
 			@include justify(flex-start);
 			align-items:center;
 			div:nth-of-type(1),div:nth-of-type(3),div:nth-of-type(4){
-				@include widthHeight(1.3653333333rem,1.3653333333rem);
-				margin-right:0.3413333333rem;
+				@include widthHeight(1.553333333rem,1.5653333333rem);
+				margin-right:0.5413333333rem;
 				svg{
 					@include widthHeight(100%, 100%);
 				}
 			}
 			div:nth-of-type(2){
-				margin-right:0.3413333333rem;
-				width:9.8rem;
+				margin-right:0.5413333333rem;
+				width:19.8rem;
 				height:1.152rem;
 				border-bottom:1px solid #e0e0e0;
 				input{
 					display:block;
-					width:9.8rem;
+					width:17.8rem;
 					padding:0 0.4133333333rem;
 					line-height:1.152rem;
 					height:1.152rem;
@@ -600,7 +629,7 @@
 				.send{
 					width:1.8133333333rem;
 					background:#16af17;
-					height:1.3653333333rem;
+					height:1.5653333333rem;
 					padding:.682666rem 0;
 					border-radius:5px;
 					@include justify(center);

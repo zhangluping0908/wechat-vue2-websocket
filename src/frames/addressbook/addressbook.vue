@@ -63,21 +63,14 @@
 						</ul>
 					</li>
 				</ul>
-				<section class="guide_wipe">
-					<section class="list_guide">
-						<dl>
-							<dd v-for="(value, index) in sortlist" :key="index" @touchstart="startThing(value)" @touchend="endThing">{{value}}</dd>
-						</dl>
-						<p>#</p>
-					</section>
-				</section>
+
 				<section class="big-letter" v-if="letter">
 					<div class="letter-bg"></div>
 					<div class="letter">
 						{{atpresent}}
 					</div>
 				</section>
-				<section class="peoplenum">{{peoplenum}}位联系人</section>
+				<section class="peoplenum">共{{peoplenum}}位联系人</section>
 			</div>
 
 		</section>
@@ -189,6 +182,7 @@
 <style lang="scss" scoped>
 	@import "../../style/public";
 	.router-show-enter-active,.router-show-leave-active{
+		// width: 356px;
 		transition: all .4s;
 	}
 	.router-show-enter,.router-show-leave{
@@ -196,18 +190,20 @@
 	}
 
 	.contacts{
-		width:100%;
+		width:380px;
+		height: 670px;
+		overflow: auto;
+		overflow-x: hidden;
 		background:#fff;
-		padding-top:2.06933rem;
+		// padding-top:3.06933rem;
 		.contacts_top{
 			ul{
-				width:14rem;
-				margin:0 auto;
-				-webkit-overflow-scrolling: touch; 
+				margin-top: 45px;
+				-webkit-overflow-scrolling: touch;
 				.contacts_li{
-					width:100%;
-					margin:0.3413333333rem 0;
 					border-bottom:1px solid #e0e0e0;
+    				padding: 5px 0px;
+					margin:0 10px;
 					@include justify(flex-start);
 					align-items:center;
 					.contacts_img{
@@ -228,11 +224,10 @@
 			}
 		}
 		.contacts_bottom{
-			
+			position: relative;
 			.contacts_bottom_ul{
 				
 				li{
-					width:100%;
 					h1{
 						display:block;
 						background:#ebebeb;
@@ -241,10 +236,9 @@
 						@include sizeColor(0.384rem,#8a8a8a);
 					}
 					ul{
-						width:14rem;
-						margin:0 auto;
 						li{
-							padding:0.3413333333rem 0;
+							padding:0.3413333333rem 0px;
+							margin: auto 10px;
 							@include justify(flex-start);
 							border-bottom:1px solid #e0e0e0;
 							align-items:center;
@@ -269,9 +263,9 @@
 				}
 			}
 			.guide_wipe{
-				position: fixed;
+				position: absolute;
 				width:30px;
-				height:100%;
+				height:500px;
 				top:0;
 				right:0;
 				.list_guide{
@@ -279,7 +273,7 @@
 					z-index:10;
 					top:50%;
 					transform:translateY(-50%);
-					right:0.2986666667rem;
+					right:-0.2986666667rem;
 					dl{
 						dd{
 							@include sizeColor(0.58rem,#585858);

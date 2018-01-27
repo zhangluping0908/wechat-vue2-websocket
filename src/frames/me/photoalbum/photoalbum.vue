@@ -6,7 +6,7 @@
 				<ul>
 					<li v-for="item in photoData">
 						<div class="photo_left">
-							<span>{{item.albumday}}</span>
+							<span>{{item.albumday}}</span>/
 							<span>{{item.albummonth}}</span>
 						</div>
 						<div class="photo_right">
@@ -67,18 +67,19 @@
 	@import "src/style/public";
 	.child_page{
 		position: absolute;
-		width:100%;
-		height:100%;
 		top: 0;
 		left: 0;
 		right: 0;
 		bottom: 0;
 		z-index: 203;
 		background-color: #fff;
+		width: 380px;
+		height: 670px;
 	}
 	.photoalbum{
 		padding-top:2.06933rem;
 		background-color: #fff;
+		height: 500px;
 		.container{
 			width:100%;
 			padding-top:0.4266666667rem;
@@ -103,7 +104,7 @@
 					.photo_right{
 						.albumdetail{
 							.teletext{
-								margin-bottom:0.2133333333rem;
+								margin-bottom:2.2133333333rem;
 								.teletext_left{
 									@include widthHeight(3.1573333333rem,3.1573333333rem);
 									overflow:hidden;
@@ -127,7 +128,7 @@
 									}
 								}
 								.teletext_right{
-									width:7.68rem;
+									width:19.68rem;
 									height: 3.15733rem;
 									margin-left:0.256rem;
 									position:relative;
@@ -157,8 +158,8 @@
 								margin-bottom:0.2133333333rem;
 								p{
 									@include sizeColor(0.5973333333rem,#030303);
-									width:10.4533333333rem;
-									line-height:0.8533333333rem;
+									width:22.4533333333rem;
+									line-height:1.8533333333rem;
 									overflow:hidden;
 									text-overflow: ellipsis;
 									display: -webkit-box;

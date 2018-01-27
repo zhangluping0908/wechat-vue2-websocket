@@ -21,12 +21,13 @@
 			</ul>
 			<ul>
 				<router-link to='/me/settings/aboutwc' tag="li">
-					关于微信
+					关于网信
 				</router-link>
 				<!-- <router-link to='/me/settings/help' tag="li">
 					帮助与反馈
 				</router-link> -->
-				<router-link to='/me/settings/login' tag="li">
+
+				<router-link to='/me/settings/logout' tag="li">
 					退出
 				</router-link>
 			</ul>
@@ -58,22 +59,36 @@
 			
 		},
 		methods:{
-
+			// islogout(){
+			// 	if(localStorage.getItem('name')){
+			// 		alert('确定要退出吗？')
+			// 		localStorage.removeItem('status')
+			// 		localStorage.removeItem('name')
+			// 		localStorage.removeItem('message')
+			// 		localStorage.removeItem('id')
+			// 		localStorage.removeItem('wxid')
+			// 		localStorage.removeItem('avatar')
+			// 		localStorage.removeItem('psw')
+			// 		this.$router.push('/logout')
+			// 	}else{
+			// 		alert('您还未登录,请登录！')
+			// 		this.$router.push('/login')
+			// 	}
+			// }
 		}
 	}
 </script>
 <style lang="scss" scoped>
 	@import "src/style/public";
 	.child_page{
-		position: fixed;
-		width:100%;
-		height:100%;
-		top: 0;
-		left: 0;
-		right: 0;
+		position: absolute;
+		top: 0px;
+		right: 0px;
 		bottom: 0;
 		z-index: 203;
 		background-color: #ebebeb;
+		width: 380px;
+		height: 670px;
 	}
 	.router-show-enter-active,.router-show-leave-active{
 		transition: all .4s;

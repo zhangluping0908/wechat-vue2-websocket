@@ -25,10 +25,45 @@ textarea { -webkit-appearance: none;}
 html,body{
     height: 100%;
     width: 100%;
-    background-color: #ebebeb;
+    // background-color: #ebebeb;
+    // font-size: 62.5% !important;
+    font-size: 100% !important;
 }
+.body{
+    height: 500px;
+    width: 100%;
+    position: relative;
+    list-style: none;
+    // 
+    p{
+        font-size: 2rem;
+    }
+}
+.text{
+    padding: 300px 150px;
+    font-size: 2rem;
+    margin: auto 50px;
 
-
+}
+.phone{
+    position: absolute;
+    width: 443px;
+    height: 885px; 
+    top: 0px;
+    right: 200px;
+    background-image: url('https://demo.mobiscroll.com/Content/img/phones/iphone6s-black-minimal@1x.png');
+    background-repeat: no-repeat;
+}
+#weixin{
+    width: 380px;
+    height: 670px;
+    // border: solid 2px #f40;
+    background-color: #ebebeb;
+    position: absolute;
+    top: 108px;
+    right: 231px;
+    overflow: hidden;
+}
 .clear:after{
     content: '';
     display: block;

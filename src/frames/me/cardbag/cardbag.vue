@@ -56,6 +56,7 @@
 		bottom: 0;
 		z-index: 203;
 		background-color: #ebebeb;
+		width: 380px;
 	}
 	.carbag{
 		padding-top:2.06933rem;

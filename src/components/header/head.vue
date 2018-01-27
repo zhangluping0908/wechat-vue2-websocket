@@ -1,7 +1,7 @@
 <template>
 	<header>
 		<section class="logoPart" v-if="logoPart">
-			微信
+			网信
 		</section>
 		<section class="logoPart" v-if="crossover">
 			<section class="goback" @click="goBackThing">
@@ -133,11 +133,12 @@
 <style lang="scss" scoped>
 	@import "../../style/public";
 	header{
-		@include widthHeight(100%,2.06933rem);
+		@include widthHeight(380px,35px);
 		background:$black;
 		z-index:200;
 		color:#fff;
-		position: fixed;
+		// position: fixed;
+		position: absolute;
 		.logoPart{
 			@include topcenter;
 			@include sizeColor(0.704rem,#fff);
@@ -201,8 +202,8 @@
 			.selectlist{
 				position: absolute;
 				z-index:100;
-				top:2.06933rem;
-				right:0.4693333333rem;
+				top:143px;
+				right:231px;
 				width:8.5333333333rem;
 				background:#373b3e;
 				ul{

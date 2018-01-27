@@ -34,11 +34,12 @@
 	@import "src/style/public";
 	.child_page{
 		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
+		top: 50px;
+		right: 200px;
 		bottom: 0;
 		z-index: 203;
 		background-color: #ebebeb;
+		width: 380px;
+		height: 670px;
 	}
 </style>

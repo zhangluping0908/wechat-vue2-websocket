@@ -264,13 +264,14 @@
 	.child_page{
 		position: absolute;
 		width:100%;
-		height:100%;
+		height:670px;
 		top: 0;
 		left: 0;
 		right: 0;
 		bottom: 0;
 		z-index: 203;
 		background-color: #f8f8f8;
+		width: 380px;
 	}
 	.refresh{
 		position: absolute;
@@ -283,7 +284,8 @@
 		width:100%;
 		padding-bottom:1rem;
 		background-color: #f8f8f8;
-		overflow:scroll;  
+		overflow:auto;  
+		height: 670px;
 		-webkit-overflow-scrolling: touch; 
 		.friend{
 			padding-top:2.06933rem;
@@ -401,7 +403,7 @@
 							}
 						}
 						.condition_right{
-							width:12.9026666667rem;
+							width:24.9026666667rem;
 							h1{
 								display:block;
 								padding-top:0.1706666667rem;
@@ -411,7 +413,7 @@
 								margin-top:0.064rem;
 								width:100%;
 								@include sizeColor(0.5546666667rem,#333);
-								line-height:0.7466666667rem;
+								line-height:1.7466666667rem;
 								overflow : hidden;
 								text-overflow: ellipsis;
 								display: -webkit-box;
@@ -554,18 +556,18 @@
 
 			}
 			.criticism{
-				position: fixed;
+				position: absolute;
 				left:0;
 				z-index:10;
-				bottom:0;
-				width:100%;
+				bottom:-37px;
+				width:380px;
 				background:#ebebeb;
 				.criticism_con{
 					padding:0.4266666667rem 0.64rem;
 					@include justify(space-between);
 					textarea{
 						display:block;
-						width:12rem;
+						width:20rem;
 						height:1.5rem;
 						max-height:3.2rem;
 						border:0;

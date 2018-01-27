@@ -78,7 +78,9 @@
 			
 		},
 		mounted(){
+			//const allgroup = data => fetch('/user/all', data)
 			allgroup().then((res)=>{
+				console.log(res)
 				if(res.status == 200){
 					this.allPeople=res.users
 					if(this.allPeople.length > 20){
@@ -116,13 +118,14 @@
 		transform:translateX(100%)
 	}
 	.child_page{
-		position: fixed;
+		position: absolute;
 		top: 0;
 		left: 0;
 		right: 0;
 		bottom: 0;
 		z-index: 203;
-    	overflow-y: scroll;
+    	overflow-y: auto;
+		overflow-x: hidden;
     	-webkit-overflow-scrolling:touch;
 		background-color: #ebebeb;
 	}

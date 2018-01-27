@@ -11,7 +11,7 @@
 					</div>
 				</li>
 				<li class="new_music">
-					<div>自动下载微信安装包</div>
+					<div>自动下载网信安装包</div>
 					<div class="voice-music">
 						从不
 					</div>
@@ -35,7 +35,7 @@
 					<div>流量统计</div>
 				</li>
 				<li>
-					<div>清理微信存储空间</div>
+					<div>清理网信存储空间</div>
 				</li>
 			</ul>
 		</section>
@@ -70,13 +70,14 @@
 <style lang="scss" scoped>
 	@import "src/style/public";
 	.child_page{
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
+		position: absolute;
+		top: 0px;
+		right: 0px;
 		bottom: 0;
 		z-index: 203;
 		background-color: #ebebeb;
+		width: 380px;
+		height: 670px;
 	}
 	.newmessage{
 		padding-top: 3.06933rem;

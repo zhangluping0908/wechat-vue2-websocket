@@ -16,7 +16,7 @@
 						</div>
 					</div>
 					<div class="details_right_obt">
-						微信号：{{infor.wxid}}
+						网信号：{{infor.wxid}}
 					</div>
 				</div>
 			</div>
@@ -40,6 +40,9 @@
 							个人相册
 						</div>
 						<div class="person_photo_right clear">
+							<span class="photo"></span>
+							<span class="photo"></span>
+							<span class="photo"></span>
 							<img :src="value" alt="" v-for="value in gallery">
 						</div>
 					</router-link>
@@ -107,13 +110,14 @@
 		transform:translateX(100%)
 	}
 	.child_page{
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
+		position: absolute;
+		top: 0px;
+		right: 0px;
 		bottom: 0;
 		z-index: 203;
 		background-color: #ebebeb;
+		width: 380px;
+		height: 670px;
 	}
 	.details{
 		width:100%;
@@ -189,6 +193,7 @@
 				border-bottom:1px solid #e2e2e2;
 				.details_person_a{
 					display:block;
+					height: 65px;
 					@include justify(flex-start);
 					.person_photo_left{
 						@include sizeColor(0.64rem,#000);
@@ -203,6 +208,14 @@
 							margin-right:16px;
 						}
 					}
+				}
+				.photo{    
+					padding: 25px;
+    				background: #d2d2d2;
+    				font-size: 0;
+    				position: relative;
+    				top: 12px;
+    				margin-right: 10px;
 				}
 			}
 		}

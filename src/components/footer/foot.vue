@@ -1,6 +1,6 @@
 <template>
 	<div class="footer">
-		<!-- 微信底部导航SVG存放 -->
+		<!-- 网信底部导航SVG存放 -->
 		<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="position:absolute;width:0;height:0;visibility:hidden">
 		 	<defs>
 		 		<symbol viewBox="0 0 1024 1024" id="wx">
@@ -30,14 +30,17 @@
 		 	</defs>
 		 </svg>
 		<ul class="clear">
-			<router-link to="/dialogue" tag="li" class="footer_li">
+
+			<router-link to="/dialogue" tag="li" class="footer_li" @click.native="wxList">
 				<section class="li_svg">
 					<svg>
 			    		<use xmlns:xlink="http://www.w3.org/1999/xlink" :xlink:href="$route.path.indexOf('dialogue') !== -1 ? '#wxlight' : '#wx'"></use>
 					</svg>
+					<i class="findwarn" v-if="firendwarn"></i>
 				</section>
-				<section class="li_text" :class="$route.path.indexOf('dialogue') !== -1 ? 'colortext' : 'color' " >微信</section>
+				<section class="li_text" :class="$route.path.indexOf('dialogue') !== -1 ? 'colortext' : 'color' " >网信</section>
 			</router-link>
+
 			<router-link to="/addressbook" tag="li" class="footer_li">
 				<section class="li_svg">
 					<svg>
@@ -46,6 +49,7 @@
 				</section>
 				<section class="li_text" :class="$route.path.indexOf('addressbook') !== -1 ? 'colortext' : 'color' " >通讯录</section>
 			</router-link>
+
 			<router-link to="/find" tag="li" class="footer_li">
 				<section class="li_svg">
 					<svg>
@@ -55,6 +59,7 @@
 				</section>
 				<section class="li_text" :class="$route.path.indexOf('find') !== -1 ? 'colortext' : 'color' " >发现</section>
 			</router-link>
+
 			<router-link to="/me" tag="li" class="footer_li">
 				<section class="li_svg">
 					<svg>
@@ -63,12 +68,13 @@
 				</section>
 				<section class="li_text" :class="$route.path.indexOf('me') !== -1 ? 'colortext' : 'color' " >我</section>
 			</router-link>
+
 		</ul>	
 	</div>
 </template>
 
 <script>
-	import {mapState} from 'vuex'
+	import {mapState, mapMutations} from 'vuex'
 	export default{
 		data(){
 			return{
@@ -76,7 +82,7 @@
 			}
 		},
 		created(){
-			
+
 		},
 		mounted(){
 			
@@ -90,20 +96,27 @@
 			]),
 		},
 		methods:{
-
+			...mapMutations([
+				'CHANGE_RED'
+			]),
+			wxList(){
+				if(this.$route.path.indexOf("dialogue") !== -1){
+					this.CHANGE_RED(false);
+				}
+			}
 		}
 	}
 </script>
 <style lang="scss" scoped>
 	@import "../../style/public";
 	.footer{
-		position: fixed;
-		bottom:0;
-		@include widthHeight(100%, auto);
+		position: absolute;
+		bottom:0px;
+		@include widthHeight(380px, 42px);
 		background:#fcfcfc;
 		border-top:1px solid #d4d4d4;
 		ul{
-			@include widthHeight(100%, 2.2826666667rem);
+			@include widthHeight(380px, 2.2826666667rem);
 			@include justify(space-around);
 			box-sizing:border-box;
 			.footer_li{

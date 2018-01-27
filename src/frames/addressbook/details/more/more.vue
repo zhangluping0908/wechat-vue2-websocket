@@ -1,6 +1,6 @@
 <template>
 	<section class="child_page">
-		<head-top crossover="微信"></head-top>
+		<head-top crossover="网信"></head-top>
 		<section class="more">
 			<div>
 				<span>个性签名</span><span>{{infor.sdasd}}</span>
@@ -43,13 +43,14 @@
 <style lang="scss" scoped>
 	@import "src/style/public";
 	.child_page{
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
+		position: absolute;
+		top: 0px;
+		right: 0px;
 		bottom: 0;
 		z-index: 203;
 		background-color: #ebebeb;
+		width: 380px;
+		height: 670px;
 	}
 	.more{
 		padding-top:2.9226633rem;

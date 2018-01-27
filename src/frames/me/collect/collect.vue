@@ -63,6 +63,7 @@
 		bottom: 0;
 		z-index: 203;
 		background-color: #ebebeb;
+		width: 380px;
 	}
 	.collect{
 		background-color: #ebebeb;

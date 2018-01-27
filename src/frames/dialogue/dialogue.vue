@@ -11,29 +11,25 @@
 							<use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#computer"></use>
 						</svg>
 					</section>
-					<section class="computer_text">Windows 微信已登录<span v-if="mute">， 手机通知已关闭</span></section>
+					<section class="computer_text">Windows 网信已登录<span v-if="mute">， 手机通知已关闭</span></section>
 				</router-link>
 			</section>
 			<!-- 对话列表 -->
 			<section class="conversation">
 				<ul>
-					<router-link to="/singlechat" tag="li" v-for="item in dialogueList" @click.native="refreshInfor(item)">
+					<router-link to="/singlechat" tag="li" v-for="item in dialogueList" @click.native="refreshInfor(userMap[item.wxid])">
 						<div class="imgwipe">
-							<i class="redicon_num" v-if="newinfor">
-							1
-							</i>
-							<i class="redicon" v-if="newtext"></i>
 							<div class="imgstyle">
 								<img :src="item.headurl" alt="">
 							</div>
 						</div>
 						<div class="infordetail">
 							<div class="infordetail_top clear">
-								<span class="left ellipsis">{{item.remarks ? item.remarks : item.petname}}</span>
-								<span class="right">12:07</span>
+								<span class="left ellipsis">{{userMap[item.wxid].petname}}</span>
+								<span class="right">{{item.time}}</span>
 							</div>
 							<div class="infordetail_bot ellipsis">
-								{{item.newmeassage}}
+								{{item.msg}}
 							</div>
 						</div> 
 					</router-link>
@@ -64,25 +60,7 @@
 			</section>
 		</div>
 		<!-- 输入用户名弹窗 -->
-		<section class="consumer" :class="{consumeradd : consumer}" v-if="consumerthing">
-			<div class="consumerbg"></div>
-			<div class="consumercon">
-				<section class="login">
-					<div class="useid" :class="{'useid_border' : borderColor}">
-						<div class="mark">帐号</div>
-						<div class="input_mark"><input type="text" placeholder="微信号(随便输入)" v-model="inputaccounts" @input="inpuMark" @click="accountsMark" /></div>
-						<div class="svg_close" v-if="accounts" @click="clearMark">
-							<svg fill="#c3c3c3">
-								<use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#close"></use>
-							</svg>
-						</div>
-					</div>
-					<div class="login_botton" @click="loginSuccess"> 
-						登 录
-					</div>
-				</section>
-			</div>
-		</section>
+
 		<!-- 底部导航 -->
 		<foot-guide></foot-guide>
 		<transition name="router-show">
@@ -97,7 +75,9 @@
 	import {imgurl} from 'src/config/env';
 	import {mapState,mapActions,mapMutations} from 'vuex'
 	import {groupChat, userInfo, login, dialog} from 'src/service/getData'
+	import { contacts, userMap } from 'src/service/data/contacts'
 	import fetch from 'src/config/fetch'
+	import {requireImgUrl} from 'src/utils/requireImgUrl'
 
 	export default{
 		data(){
@@ -114,28 +94,25 @@
 				borderColortwo: false,
 				timer:null,	
 				groupHead:[],
-				dialogueList:[]
+				dialogueList: [],
+				userMap:userMap,
+				list: {}
 			}
 		},
 		created(){
 			this.initData()
+			this.getDialogueData()
 		},
 		beforeDestroy(){
 			
 		},
 		beforeMount(){
-			//console.log(this.contactList)
+			// console.log('this.contactList', this.contactList)
 		},
 		mounted(){	
 			groupChat().then( (res) =>{
 				this.groupHead=[...res.grouphead]
-				
-			});
-			dialog().then((res) =>{
-				this.dialogueList=[...res]
-				this.dialogueList=[...this.contactList,...this.dialogueList]
-			})
-			
+			});	
 		},
 		components:{
 			headTop,
@@ -143,23 +120,47 @@
 		},
 		computed:{
 			...mapState([
-				'mute', 'computershow', 'infor' ,'contactList','consumerthing',
+				// 'mute', 'computershow', 'infor' ,'contactList','consumerthing',
+				'mute', 'computershow', 'infor' ,'contactList',
 			]),
 			
 		},
 		methods:{
-			
             ...mapMutations([
 				"SAVE_MESSAGE","LOGIN_COVER" ,'GET_USERINFO'
 			]),
+			getDialogueData(){
+				var that = this
+				var ws = new WebSocket('ws://10.20.88.76:8204/multisub-split/' + localStorage.getItem('wxid'))
+				ws.onmessage = env => {
+					var format = decodeURIComponent(env.data).split('&')
+					var msg = format[0].split('=')[1]
+					var wxid = format[1].split('=')[1]
+					var time = format[2].split('=')[1]
+					this.list[wxid] = {
+						wxid,
+						msg ,
+						headurl: requireImgUrl(wxid),
+						time:new Date(parseInt(time) * 1000).toLocaleString().replace(/:\d{1,2}$/,' ')
+					}
+					that.dialogueList = Object.values(this.list)
+				}
+				// setTimeout(function(){
+				// 	console.log(that.dialogueList)
+				// }, 1000)
+			},
 			async initData(){
 				try{
 					const user_id = localStorage.getItem('user_id')
-					const res = await userInfo(user_id)
-					if (res.status !== 200) {
-						this.LOGIN_COVER(true)
-					}else{
-						this.GET_USERINFO(res.user_info)
+					// const res = await userInfo(user_id)
+					const res = {
+						status: localStorage.getItem('status'),
+						message: localStorage.getItem('message'),
+						user_info: {
+							avatar: localStorage.getItem('avatar'),
+							name: localStorage.getItem('name'),
+							id: localStorage.getItem('id')
+						}
 					}
 				}catch(err){
 					console.log('获取用户信息失败', err)
@@ -190,23 +191,6 @@
             clearCode(){
             	this.inputcode="";
             	this.code=false;
-            },
-            async loginSuccess(){
-
-            	if(this.inputaccounts){
-            		this.consumer=true;
-            		try{
-						const res = await login({username: this.inputaccounts})
-						if (res.status == 200) {
-							localStorage.setItem('user_id', res.user_info.id.toString())
-							this.GET_USERINFO(res.user_info)
-							this.LOGIN_COVER(false)
-						}
-					}catch(err){
-						console.log('注册失败', err)
-						this.LOGIN_COVER(true)
-					}
-            	}
             }
 		}
 	}
@@ -229,16 +213,16 @@
 	}
 	.consumer{
 		position: fixed;
-		width:100%;
-		height:100%;
-		top:0;
-		left:0;
+		width: 380px;
+		height: 670px;
+		top:50px;
+		right:200px;
 		z-index:100;
 		.consumerbg{
 			position: fixed;
-			width:100%;
-			height:100%;
-			top:0;
+		width: 380px;
+		height: 670px;
+			top:50px;
 			background:#000;
 			opacity: .5;
 		}
@@ -248,7 +232,7 @@
 				background:#fff;
 				border-radius:5px;
 				padding: 1rem;
-				width:12.3786666667rem;
+				width:18.3786666667rem;
 				margin:0 auto;
 				.useid{
 					width:100%;
@@ -264,10 +248,10 @@
 					.input_mark{
 						margin-right:0.34rem;
 						margin-left:.5rem;
-						@include widthHeight(5.1rem,2.0266666667rem);
+						@include widthHeight(10.1rem,2.0266666667rem);
 						input{
 							display:inline-block;
-							width:5.1rem;
+							width:10.1rem;
 							line-height:2rem;
 							@include sizeColor(0.64rem, #333);
 						}
@@ -299,7 +283,7 @@
 		animation:fadeOut .4s 1 linear both;
 	}
 	.dialogue{
-		width:100%;
+		width: 380px;
 		background:#fff;
 		.dialogue_con{
 			padding-top:2.06933rem;
@@ -386,7 +370,7 @@
 							}
 						}
 						.infordetail{
-							width:11.5626666667rem;
+							width:25.5626666667rem;
 							padding-top:0.2133333333rem;
 							.infordetail_top{
 								width:100%;

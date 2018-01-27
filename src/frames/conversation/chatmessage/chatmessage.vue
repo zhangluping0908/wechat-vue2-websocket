@@ -77,12 +77,13 @@
 	}
 	.child_page{
 		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
+		top: 108px;
+		right: 231px;
 		bottom: 0;
 		z-index: 203;
 		background-color: #ebebeb;
+		width: 380px;
+		height: 670px;
 	}
 	.groupchat{
 		padding-top: 2.9rem;

@@ -20,7 +20,7 @@
 						</div>
 					</div>
 					<div class="newshow_text">
-						开启后，为你推荐已开通微信的手机联系人。
+						开启后，为你推荐已开通网信的手机联系人。
 					</div>
 				</li>
 				<li>
@@ -120,6 +120,7 @@
 		bottom: 0;
 		z-index: 203;
 		background-color: #ebebeb;
+		width: 380px;
 	}
 	.newmessage{
 		background-color: #ebebeb;

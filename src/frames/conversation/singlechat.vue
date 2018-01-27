@@ -9,14 +9,16 @@
 				</router-link>
 			</section>
 		</head-top>
-		<section class="coversation" ref="singleHeight">
-			<section class="coversationlist" @click="bottomHide">
-				<div class="underscore">————&nbsp;我是机器人小辰，现在我们可以聊天了&nbsp;————</div>
-				<ul>
+		<section class="coversation"   >
+			<section class="coversationlist" @click="bottomHide" ref="chat">
+				<ul id="chat-content">
 					<!-- 对方 -->
 					<li v-for="item in conversine">
 						<div class="other" :class="{mysay : item.sendobject !== 1 }">
-							<img :src="item.headurl" alt="" @click="enlargeImg(item.headurl)">
+						
+							<div class='say-time'>{{item.sendobject == 1 ? item.time : new Date(Number(new Date().getTime())).toLocaleDateString() + " " + new Date(Number(new Date().getTime())).toLocaleTimeString().substr(0, 7)}}</div>
+
+							<img :src="item.sendobject == 1 ? item.headurl : userInfoData.avatar"  alt="" @click="enlargeImg(item.headurl)">
 							<div class="whatsay">
 								<div class="whatsay_svg">
 									<svg>
@@ -96,6 +98,8 @@
 	import 'src/config/swiper.min.js' 
 	import 'src/style/swiper.min.css'
 	import fetch from 'src/config/fetch'
+	import $ from 'jquery'
+	import {requireImgUrl} from 'src/utils/requireImgUrl'
 
 	export default{ 
 		data(){
@@ -103,7 +107,7 @@
 				inputmessage:'',//输入的文本内容
 				light:false,	//输入框不为空时，input下边框变色
 				clickmore:false,	//点击加号底部显示、隐藏
-				chatname:'',		//聊天名字
+				chatname:'this.infor.petname',		//聊天名字
 				ifme:false,			//发消息的对象是否是自己
 				enlargeurl:'',		//头像地址
 				enlargehides:false,
@@ -114,12 +118,15 @@
 				robotCont:'',
 				newInfo:{},
 				chatData:{},
-				userInfoData:{}
+				userInfoData:{},
+				talk:[],
+				// otherimg: ''
 			}
 		},
 		created(){
-
+			this.getSingleTalkData()
 		},
+
 		mounted(){
 		    chatData().then((res) => {
 		    	this.chatData=res;
@@ -131,8 +138,14 @@
 	    	    });
 		    })
 			this.chatname=this.infor.remarks ? this.infor.remarks : this.infor.petname;
-			this.getUserInfo();
-			this.userInfoData=this.userInfo
+			// this.getUserInfo();
+			// this.userInfoData=this.userInfo
+			this.userInfoData = {
+				avatar: requireImgUrl(localStorage.getItem('wxid')),
+				id: localStorage.getItem('id'),
+				name: localStorage.getItem('name'),
+				wxid: localStorage.getItem('wxid')
+			}
 			userWord().then((res) => {
 				//this.conversine=[...res]
 			});	
@@ -149,6 +162,13 @@
 		beforeDestroy(){
             clearTimeout(this.timer);
         },
+		updated: function(){
+			this.$nextTick(()=>{
+				if(this.$refs.chat){
+					$(this.$refs.chat).scrollTop($('#chat-content').height())
+				}
+			})
+		},
 		methods:{
 			...mapActions([
                 'getUserInfo',
@@ -174,38 +194,47 @@
 			inputBottomHide(){
 				this.clickmore=false;
 			},
-			async clickSend(){
+			getSingleTalkData(){
+				var ws = new WebSocket('ws://10.20.88.76:8204/multisub-split/' + localStorage.getItem('wxid'))
+				ws.onmessage = env => {
+					var str = decodeURIComponent(env.data).split('=')[1].split('&')[0]
+					const fromUserId = env.data.split('&')[1].split('=')[1]
+					var timeStamp = decodeURIComponent(env.data).split('&')[2].split('=')[1];				
+					if(fromUserId == this.infor.wxid && 
+						fromUserId != this.userInfoData.wxid
+					){
+						this.conversine.push({
+							"wxid":this.infor.wxid,
+							'headurl': requireImgUrl(this.infor.wxid),
+							"sendobject":this.infor.sendobject,
+							"Messageblob":str,
+							"time":new Date(parseInt(timeStamp) * 1000).toLocaleString().replace(/:\d{1,2}$/,' '),
+							"flag": decodeURIComponent(env.data).split('&')[1] == 'fromUserId=' + this.userInfoData.wxid
+						});	
+					}
+				}
+			},
+			async clickSend(){						
 				this.conversine.push({
-					"wxid":"xulianjie442154157",
-					"headurl":imgurl+this.userInfoData.avatar,
+					"wxid": this.userInfoData.wxid,
+					"avatar": this.userInfoData.avatar,
 					"sendobject":0,
-					"Messageblob":this.inputmessage,
+					"Messageblob":this.inputmessage,	
 				});
 				const inputmessage = this.inputmessage;
 				this.inputmessage='';
-				this.$nextTick(()=>{
-					window.scrollTo(0,this.$refs.singleHeight.offsetHeight-window.innerHeight)
-				})
-				try{
-					const res = await fetch('/robot/question', {question: inputmessage})
-					this.light=false;
-					if (res.status == 200) {
-						this.infor.Messageblob=res.content
-						this.conversine.push({
-							"wxid":this.infor.wxid,
-							"headurl":this.infor.headurl,
-							"sendobject":this.infor.sendobject,
-							"Messageblob":res.content,
-						});
-						this.$nextTick(()=>{
-							window.scrollTo(0,this.$refs.singleHeight.offsetHeight-window.innerHeight)
+				$.ajax({
+					url:'http://10.20.88.76:8204/pub/123',
+					data:{
+						data: JSON.stringify({
+						'toUserId': this.infor.wxid,
+						'fromUserId': this.userInfoData.wxid,
+						'message': inputmessage
 						})
-					}else{
-						throw new Error(res)
-					}
-				}catch(err){
-					alert('获取机器人聊天信息失败', err);
-				}
+					},
+					method:'post',
+					dataType:'json'
+				})
 			},
 			enlargeImg(enlargeImg){
 				this.enlargeurl=enlargeImg;
@@ -246,37 +275,53 @@
 		}
 	}
 	.coversation{
+		height: 630px;
 		background-color: #ebebeb;
 		-webkit-overflow-scrolling: touch; 
-		padding-top: 2.06933rem;
+		padding-top: 3.06933rem;
+
+		position: relative;
 		.coversationlist{
 			position: relative;
-			padding:0 .32rem;
+			right: -20px;
+			padding-right: 20px;
 			overflow:auto;
-			margin:0 auto;
+			overflow-x: hidden;
+			margin-left: -10px;
+			height: 600px;
 			.underscore{
 				padding-top:0.2rem;
 				text-align:center;
 				@include sizeColor(0.5546666667rem,#999);
 			}
 			ul{
-				padding-top:.4rem;
-				padding-bottom:2.2rem;
-				width:15.4rem;
+				overflow: auto;
+				overflow-x: hidden;
 				overflow-scrolling: touch; 
-				-webkit-overflow-scrolling: touch; 
-				top:0;
+				-webkit-overflow-scrolling: touch; 	
+				padding-top: 20px;		
 				li{
 					.other{
-						width:100%;
+						width:380px;
 						@include justify(flex-start);
-						margin-bottom:0.512rem;
+						margin-bottom:1.3rem;
+						padding-right: 20px;
 						align-items:top;
+						position: relative;
 						img{
 							display:block;
+							margin-top: 5px;
 							@include widthHeight(1.7493333333rem,1.7493333333rem);
 						}
+						.say-time{
+							@include sizeColor(.48rem,#999);
+							width: 10rem;
+							position: absolute;
+							top: -12px;
+							// right:.8rem;
+						}
 						.whatsay{
+							margin-top: 5px;
 							position: relative;
 							.whatsay_svg{
 								@include widthHeight(0.4266666667rem,0.64rem);
@@ -293,7 +338,7 @@
 							.whatsay_text{
 								margin-left:0.6399997rem;
 								max-width:10.3253333333rem;
-								background:#fff;
+								background:#9fe658;
 								padding:0.42rem 0.384rem;
 								border:1px solid #d9d9d9;
 								border-radius:8px;
@@ -307,7 +352,18 @@
 					.mysay{
 						display:flex;
 						flex-direction:row-reverse;
+						position: relative;
+						.say-time{
+							position: absolute;
+							top: -.8rem;
+							right:1rem;
+							width: 8rem;
+						}
+						img{
+							// margin-right: 5px;
+						}
 						.whatsay{
+							
 							.whatsay_svg{
 								right:.36rem;
 								left:auto;
@@ -325,12 +381,13 @@
 		}
 	}
 	footer{
-		position: fixed;
+		position: absolute;
 		z-index:10;
 		border-top:1px solid #e0e0e0;
 		background:#f5f5f5;
-		bottom:-11.712rem;
-		width:100%;
+		bottom: -190px;
+		width:380px;
+		overflow: hidden;
 		.foot_top{
 			padding:0 0.512rem;
 			height:2.0053333333rem;
@@ -338,20 +395,20 @@
 			@include justify(flex-start);
 			align-items:center;
 			div:nth-of-type(1),div:nth-of-type(3),div:nth-of-type(4){
-				@include widthHeight(1.3653333333rem,1.3653333333rem);
-				margin-right:0.3413333333rem;
+				@include widthHeight(1.7653333333rem,1.7653333333rem);
+				margin-right:0.5413333333rem;
 				svg{
 					@include widthHeight(100%, 100%);
 				}
 			}
 			div:nth-of-type(2){
 				margin-right:0.3413333333rem;
-				width:9.8rem;
+				width:19.8rem;
 				height:1.152rem;
 				border-bottom:1px solid #e0e0e0;
 				input{
 					display:block;
-					width:9.8rem;
+					width:17.8rem;
 					padding:0 0.4133333333rem;
 					line-height:1.152rem;
 					height:1.152rem;
@@ -369,7 +426,7 @@
 				.send{
 					width:1.8133333333rem;
 					background:#16af17;
-					height:1.3653333333rem;
+					height:1.5653333333rem;
 					padding:.682666rem 0;
 					border-radius:5px;
 					@include justify(center);
@@ -398,8 +455,8 @@
 						box-sizing:border-box;
 						li{
 							float:left;
-							width:2.5466666667rem;
-							margin-right:1rem;
+							width:25%;
+							// margin-right:1rem;
 							margin-bottom:1.1946666667rem;
 							.swiper_svg{
 								@include widthHeight(2.5466666667rem,2.5466666667rem);
@@ -408,6 +465,8 @@
 								border-radius:10px;
 								@include justify(center);
 								align-items:center;
+								transform: translate(50%);
+								margin-right: -50%;
 								svg{
 									@include widthHeight(1.28rem,0.9386666667rem);
 									display:block;

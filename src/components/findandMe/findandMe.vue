@@ -11,8 +11,8 @@
 							</svg>
 						</section>
 						<section class="me_name" v-if="pathUrl">
-							<div>{{userInfo.name}}</div>
-							<div>微信号：{{userInfo.name}}</div>
+							<div>{{userInfoData.name}}</div>
+							<div>网信号：{{userInfoData.name}}</div>
 						</section>
 						<section class="findlist_text" v-else>
 							朋友圈
@@ -120,7 +120,7 @@
 			<div class="reminder_cover"></div>
 			<div class="reminder_content" :class="{alertshow : remindershow, alerthide : reminderhide}">
 				<img :src="gifSrc" alt="" class="alertimg">
-				<p class="alert_text">正在开发中...</p>
+				<p class="alert_text">正在开发中……</p>
 				<div class="alert_affirm" @click="affirmAlert">确认</div>
 			</div>
 		</section>
@@ -142,7 +142,9 @@
 				gifSrc:'',
 				timer:null,
 				newGetImage:'',			//朋友圈动态第一个头像
-				userHeader:''			//用户头像
+				userHeader:'',
+				showpart: '退出',	//用户头像
+				userInfoData: {}
 			}
 		},
 		props: ['mepart',],
@@ -154,10 +156,16 @@
             clearTimeout(this.timer) 
         },
 		beforeMount(){
-			this.getUserInfo();
+			this.userInfoData = {
+				avatar: require('../../images/avatar/'+ localStorage.getItem('wxid') +'.jpg'),
+				id: localStorage.getItem('id'),
+				name: localStorage.getItem('name'),
+				wxid: localStorage.getItem('wxid')
+			}
+			// this.getUserInfo();
 		},
 		mounted(){
-			this.userHeader=imgurl + this.userInfo.avatar
+			this.userHeader=this.userInfoData.avatar
 			circle().then( (res) =>{
 				for(let i=0; i < res.length; i++){
 					this.newGetImage=res[0].headurl;
@@ -185,10 +193,11 @@
 					this.CHANGE_RED(false);
 				}
 			},
-			showPart(){
+			showPart(showpart){
 				this.alertreminder=true;
 				this.remindershow=true;
 				this.reminderhide=false;
+				return showpart
 			},
 			photoAlbum(){//相册或扫一扫
 				if(this.$route.path.indexOf("find") !== -1){
@@ -223,6 +232,9 @@
 			gamesFace(){
 				this.showPart()
 			},
+			settingApp(){
+				this.showPart()
+			},
 			affirmAlert(){//提醒确认
 				this.reminderhide=true;
 				this.remindershow=false;
@@ -230,7 +242,22 @@
 					clearTimeout(this.timer);
 					this.alertreminder=false;
 				},1000);
-			}
+			},
+
+			// isLogout(){
+			// 	if(localStorage.getItem('name')){
+			// 		localStorage.removeItem('status')
+			// 		localStorage.removeItem('name')
+			// 		localStorage.removeItem('message')
+			// 		localStorage.removeItem('id')
+			// 		localStorage.removeItem('wxid')
+			// 		localStorage.removeItem('avatar')
+			// 		localStorage.removeItem('psw')
+			// 		this.$router.push('/login')
+			// 	}else{
+			// 		this.$router.push('/login')
+			// 	}
+			// }
 		}
 	}
 </script>
@@ -316,14 +343,15 @@
 		}
 	}
 	.reminder{
-		position: fixed;
-		@include widthHeight(100%,100%);
+		position: absolute;
+		@include widthHeight(380px,670px);
 		top:0;
+		right: 0;
 		z-index:10;
 		.reminder_cover{
-			position: absolute;
-			top:0;
-			@include widthHeight(100%,100%);
+			// position: absolute;
+			// top:108px;
+			@include widthHeight(380px,670px);
 			background:#000;
 			opacity:.4;
 		}

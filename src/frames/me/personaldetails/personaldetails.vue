@@ -12,7 +12,7 @@
 					<span>{{userInfo.name}}</span>
 				</div>
 				<div class="privacy_child">
-					<span>微信号</span>
+					<span>网信号</span>
 					<span>{{userInfo.name}}</span>
 				</div>
 				<div class="privacy_child">
@@ -80,13 +80,15 @@
 <style lang="scss" scoped>
 	@import "src/style/public";
 	.child_page{
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
+		position: absolute;
+		top: 0px;
+		right: 0px;
+
 		bottom: 0;
 		z-index: 203;
 		background-color: #ebebeb;
+		width: 380px;
+		height: 670px;
 	}
 	.privacy{
 		padding-top: 3.06933rem;
